@@ -1,0 +1,33 @@
+name: clonning
+on:
+  workflow_dispatch:
+
+jobs:
+  update-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.LINKIT }}
+          fetch-depth: 0
+
+      - name: Add KernelSU-Next Content
+        env:
+          GITHUB_TOKEN: ${{ secrets.LINKIT }}
+        run: |
+          git config --global user.name "Link2mem"
+          git config --global user.email "Were.aksle@gmail.com"
+          
+          git clone https://github.com/KernelSU-Next/KernelSU-Next temp_ksu
+          
+          cd temp_ksu
+          git checkout eaab98b7ecb2b131f25b11972b49b2106683c6cc
+          rm -rf .git
+          cp -rn . ..
+          cd ..
+          rm -rf temp_ksu
+          
+          git add .
+          git commit -m "Add KernelSU-Next eaab98b" || exit 0
+          git push https://${{ secrets.LINKIT }}@github.com/Link2mem/N10ands10stableksun.git main
