@@ -1,4 +1,4 @@
-name: clonning
+name: cloning
 on:
   workflow_dispatch:
 
@@ -12,22 +12,32 @@ jobs:
           token: ${{ secrets.LINKIT }}
           fetch-depth: 0
 
-      - name: Add KernelSU-Next Content
+      - name: Clean and Add KernelSU-Next
         env:
           GITHUB_TOKEN: ${{ secrets.LINKIT }}
         run: |
           git config --global user.name "Link2mem"
           git config --global user.email "Were.aksle@gmail.com"
           
+          # حذف كل الملفات والمجلدات ماعدا مجلد الـ .github (الذي يحتوي على workflows) والـ .git
+          find . -maxdepth 1 ! -name '.' ! -name '.github' ! -name '.git' -exec rm -rf {} +
+          
+          # جلب نسخة KernelSU-Next
           git clone https://github.com/KernelSU-Next/KernelSU-Next temp_ksu
           
           cd temp_ksu
-          git checkout eaab98b7ecb2b131f25b11972b49b2106683c6cc
+          # الانتقال للكوميت المحدد
+          git checkout 0d6bdc6364cbfc73517dcfdf7ab23b0ba8045553
+          
+          # حذف مجلد الـ .git الخاص بـ temp_ksu لكي لا يحدث تداخل
           rm -rf .git
+          
+          # نسخ المحتويات إلى المستودع الرئيسي (بدون استثناء الملفات المخفية)
           cp -rn . ..
           cd ..
           rm -rf temp_ksu
           
+          # إضافة التغييرات، الالتزام، والدفع
           git add .
-          git commit -m "Add KernelSU-Next eaab98b" || exit 0
+          git commit -m "Clean repo and add KernelSU-Next 0d6bdc6" || exit 0
           git push https://${{ secrets.LINKIT }}@github.com/Link2mem/N10ands10stableksun.git main
